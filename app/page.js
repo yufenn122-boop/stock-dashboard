@@ -16,6 +16,7 @@ async function getData(days, symbol) {
     sql`SELECT * FROM index_fetch_log WHERE fetch_time >= ${today + 'T00:00:00'} ORDER BY fetch_time DESC`,
   ])
 
+  console.log('indices count:', indices?.length, 'sinceStr:', sinceStr)
   return { indices, logs }
 }
 
