@@ -62,12 +62,15 @@ export default function DashboardClient({ indices, logs, days, symbol }) {
 
   // Build latest map (last record per symbol)
   const latestMap = {}
-  indices.forEach(row => { latestMap[row.symbol] = row })
+  indices.forEach(row => {
+    const sym = row.symbol
+    if (!latestMap[sym]) latestMap[sym] = row
+  })
 
   // Build chart data grouped by date
   const byDate = {}
   indices.forEach(row => {
-    const d = row.trade_date
+    const d = typeof row.trade_date === 'string' ? row.trade_date.slice(0, 10) : new Date(row.trade_date).toISOString().slice(0, 10)
     if (!byDate[d]) byDate[d] = { date: d }
     byDate[d][row.symbol] = row.close
   })
