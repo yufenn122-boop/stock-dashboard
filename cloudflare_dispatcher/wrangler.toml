@@ -1,0 +1,16 @@
+name = "stock-dashboard-dispatcher"
+main = "src/index.js"
+compatibility_date = "2026-04-05"
+
+[triggers]
+# 北京 08:01 = UTC 00:01 → 触发美股
+# 北京 15:01 = UTC 07:01 → 触发A股
+crons = ["1 0 * * 1-5", "1 7 * * 1-5"]
+
+[vars]
+GITHUB_OWNER = "yufenn122-boop"
+GITHUB_REPO = "stock-dashboard"
+GITHUB_WORKFLOW_FILE = "fetch.yml"
+GITHUB_REF = "main"
+LOCAL_TIMEZONE = "Asia/Shanghai"
+GITHUB_API_VERSION = "2022-11-28"
