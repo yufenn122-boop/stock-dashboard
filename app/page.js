@@ -7,7 +7,7 @@ async function getData(days, symbol) {
   const since = new Date()
   since.setDate(since.getDate() - days)
   const sinceStr = since.toISOString().split('T')[0]
-  const today = new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Shanghai' })
+  const today = new Date().toISOString().split('T')[0]
 
   const [indices, logs] = await Promise.all([
     symbol === 'all'
