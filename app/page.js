@@ -13,7 +13,7 @@ async function getData(days, symbol) {
     symbol === 'all'
       ? sql`SELECT * FROM index_daily WHERE trade_date >= ${sinceStr}::date ORDER BY trade_date ASC`
       : sql`SELECT * FROM index_daily WHERE trade_date >= ${sinceStr}::date AND symbol = ${symbol} ORDER BY trade_date ASC`,
-    sql`SELECT * FROM index_fetch_log WHERE fetch_time >= current_date ORDER BY fetch_time DESC`,
+    sql`SELECT * FROM index_fetch_log WHERE fetch_time >= (SELECT MAX(fetch_time) - interval '10 seconds' FROM index_fetch_log) ORDER BY fetch_time DESC`,
   ])
 
   console.log('indices count:', indices?.length, 'sinceStr:', sinceStr)
