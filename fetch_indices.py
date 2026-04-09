@@ -70,15 +70,24 @@ US_INDICES = [
 
 def fetch_us_index(meta: dict) -> dict:
     import yfinance as yf
-    ticker = yf.Ticker(meta["yf_ticker"])
-    hist = ticker.history(period="5d")
+    import math
+    hist = yf.download(meta["yf_ticker"], period="5d", auto_adjust=True, progress=False)
     if hist.empty:
         raise ValueError(f"yfinance 返回空数据：{meta['yf_ticker']}")
 
-    last = hist.iloc[-1]
-    prev = hist.iloc[-2] if len(hist) >= 2 else None
-    close = float(last["Close"])
-    prev_close = float(prev["Close"]) if prev is not None else close
+    # 展平多级列名
+    if hasattr(hist.columns, 'levels'):
+        hist.columns = hist.columns.get_level_values(0)
+
+    closes = hist["Close"].dropna()
+    if len(closes) < 1:
+        raise ValueError(f"Close 全为 nan：{meta['yf_ticker']}")
+
+    close = float(closes.iloc[-1])
+    prev_close = float(closes.iloc[-2]) if len(closes) >= 2 else close
+    if math.isnan(close):
+        raise ValueError(f"close 为 nan：{meta['yf_ticker']}")
+
     change = round(close - prev_close, 4)
     change_pct = round((change / prev_close) * 100, 4) if prev_close else 0.0
 
@@ -86,8 +95,8 @@ def fetch_us_index(meta: dict) -> dict:
         "close":      close,
         "change":     change,
         "change_pct": change_pct,
-        "trade_date": hist.index[-1].date().isoformat(),
-        "data_time":  hist.index[-1].isoformat(),
+        "trade_date": closes.index[-1].date().isoformat(),
+        "data_time":  closes.index[-1].isoformat(),
     }
 
 
@@ -118,8 +127,13 @@ CN_INDICES = [
 def fetch_cn_index(meta: dict) -> dict:
     import akshare as ak
     df = ak.stock_zh_index_spot_em()
+    # akshare 返回的代码列可能带前缀，尝试精确匹配和后缀匹配
     row = df[df["代码"] == meta["ak_code"]]
     if row.empty:
+        row = df[df["代码"].str.endswith(meta["ak_code"])]
+    if row.empty:
+        # 打印前几行帮助调试
+        log.warning(f"可用代码样本：{df['代码'].head(10).tolist()}")
         raise ValueError(f"未找到代码：{meta['ak_code']}")
     r = row.iloc[0]
     today = date.today().isoformat()
