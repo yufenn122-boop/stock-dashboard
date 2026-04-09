@@ -11,9 +11,9 @@ async function getData(days, symbol) {
 
   const [indices, logs] = await Promise.all([
     symbol === 'all'
-      ? sql`SELECT * FROM index_daily WHERE trade_date >= ${sinceStr} ORDER BY trade_date ASC`
-      : sql`SELECT * FROM index_daily WHERE trade_date >= ${sinceStr} AND symbol = ${symbol} ORDER BY trade_date ASC`,
-    sql`SELECT * FROM index_fetch_log WHERE fetch_time >= ${today + 'T00:00:00'} ORDER BY fetch_time DESC`,
+      ? sql`SELECT * FROM index_daily WHERE trade_date >= ${sinceStr}::date ORDER BY trade_date ASC`
+      : sql`SELECT * FROM index_daily WHERE trade_date >= ${sinceStr}::date AND symbol = ${symbol} ORDER BY trade_date ASC`,
+    sql`SELECT * FROM index_fetch_log WHERE fetch_time >= ${today}::date ORDER BY fetch_time DESC`,
   ])
 
   console.log('indices count:', indices?.length, 'sinceStr:', sinceStr)
