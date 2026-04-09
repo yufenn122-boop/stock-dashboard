@@ -126,21 +126,36 @@ CN_INDICES = [
 
 def fetch_cn_index(meta: dict) -> dict:
     import akshare as ak
-    df = ak.stock_zh_index_spot_em()
-    # akshare 返回的代码列可能带前缀，尝试精确匹配和后缀匹配
-    row = df[df["代码"] == meta["ak_code"]]
-    if row.empty:
-        row = df[df["代码"].str.endswith(meta["ak_code"])]
-    if row.empty:
-        # 打印前几行帮助调试
-        log.warning(f"可用代码样本：{df['代码'].head(10).tolist()}")
-        raise ValueError(f"未找到代码：{meta['ak_code']}")
-    r = row.iloc[0]
     today = date.today().isoformat()
+
+    if meta["ak_code"] in ("399006", "399001"):
+        # 深交所指数用 stock_zh_index_spot_sina
+        df = ak.stock_zh_index_spot_sina(symbol="深证系列指数")
+        row = df[df["代码"] == meta["ak_code"]]
+        if row.empty:
+            df2 = ak.stock_zh_index_spot_sina(symbol="深证系列指数")
+            log.warning(f"深交所可用代码样本：{df2['代码'].head(20).tolist()}")
+            raise ValueError(f"未找到深交所代码：{meta['ak_code']}")
+        r = row.iloc[0]
+        close      = round(float(r["最新价"]), 4)
+        prev_close = round(float(r["昨收"]), 4) if "昨收" in r else close
+        change     = round(close - prev_close, 4)
+        change_pct = round((change / prev_close) * 100, 4) if prev_close else 0.0
+    else:
+        # 沪市指数用 stock_zh_index_spot_em
+        df = ak.stock_zh_index_spot_em()
+        row = df[df["代码"] == meta["ak_code"]]
+        if row.empty:
+            raise ValueError(f"未找到代码：{meta['ak_code']}")
+        r = row.iloc[0]
+        close      = round(float(r["最新价"]), 4)
+        change     = round(float(r["涨跌额"]), 4)
+        change_pct = round(float(r["涨跌幅"]), 4)
+
     return {
-        "close":      round(float(r["最新价"]), 4),
-        "change":     round(float(r["涨跌额"]), 4),
-        "change_pct": round(float(r["涨跌幅"]), 4),
+        "close":      close,
+        "change":     change,
+        "change_pct": change_pct,
         "trade_date": today,
         "data_time":  today + "T15:00:00+08:00",
     }
