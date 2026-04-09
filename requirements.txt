@@ -1,0 +1,4 @@
+yfinance>=0.2.38
+akshare>=1.12.0
+supabase>=2.3.0
+python-dotenv>=1.0.0
