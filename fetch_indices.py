@@ -128,29 +128,17 @@ def fetch_cn_index(meta: dict) -> dict:
     import akshare as ak
     today = date.today().isoformat()
 
-    if meta["ak_code"] in ("399006", "399001"):
-        # 深交所指数用 stock_zh_index_spot_sina
-        df = ak.stock_zh_index_spot_sina(symbol="深证系列指数")
-        row = df[df["代码"] == meta["ak_code"]]
-        if row.empty:
-            df2 = ak.stock_zh_index_spot_sina(symbol="深证系列指数")
-            log.warning(f"深交所可用代码样本：{df2['代码'].head(20).tolist()}")
-            raise ValueError(f"未找到深交所代码：{meta['ak_code']}")
-        r = row.iloc[0]
-        close      = round(float(r["最新价"]), 4)
-        prev_close = round(float(r["昨收"]), 4) if "昨收" in r else close
-        change     = round(close - prev_close, 4)
-        change_pct = round((change / prev_close) * 100, 4) if prev_close else 0.0
-    else:
-        # 沪市指数用 stock_zh_index_spot_em
-        df = ak.stock_zh_index_spot_em()
-        row = df[df["代码"] == meta["ak_code"]]
-        if row.empty:
-            raise ValueError(f"未找到代码：{meta['ak_code']}")
-        r = row.iloc[0]
-        close      = round(float(r["最新价"]), 4)
-        change     = round(float(r["涨跌额"]), 4)
-        change_pct = round(float(r["涨跌幅"]), 4)
+    # stock_zh_index_spot_sina 返回沪深所有指数，境外可访问
+    df = ak.stock_zh_index_spot_sina()
+    row = df[df["代码"] == meta["ak_code"]]
+    if row.empty:
+        log.warning(f"可用代码样本：{df['代码'].head(20).tolist()}")
+        raise ValueError(f"未找到代码：{meta['ak_code']}")
+    r = row.iloc[0]
+    close      = round(float(r["最新价"]), 4)
+    prev_close = round(float(r["昨收"]), 4) if "昨收" in r.index else close
+    change     = round(float(r["涨跌额"]), 4) if "涨跌额" in r.index else round(close - prev_close, 4)
+    change_pct = round(float(r["涨跌幅"]), 4) if "涨跌幅" in r.index else round((change / prev_close) * 100, 4) if prev_close else 0.0
 
     return {
         "close":      close,
