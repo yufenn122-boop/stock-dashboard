@@ -118,9 +118,9 @@ def fetch_us(cur):
 # ---------------------------------------------------------------------------
 
 CN_INDICES = [
-    {"symbol": "CSI300", "name": "沪深300",  "market": "CN", "ak_code": "000300"},
-    {"symbol": "SSEC",   "name": "上证指数", "market": "CN", "ak_code": "000001"},
-    {"symbol": "GEM",    "name": "创业板",   "market": "CN", "ak_code": "399006"},
+    {"symbol": "CSI300", "name": "沪深300",  "market": "CN", "ak_code": "sh000300"},
+    {"symbol": "SSEC",   "name": "上证指数", "market": "CN", "ak_code": "sh000001"},
+    {"symbol": "GEM",    "name": "创业板",   "market": "CN", "ak_code": "sz399006"},
 ]
 
 
