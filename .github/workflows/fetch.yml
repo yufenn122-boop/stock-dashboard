@@ -1,6 +1,9 @@
 name: Fetch Stock Indices
 
 on:
+  schedule:
+    - cron: '10 7 * * 1-5'   # 北京时间 15:10 周一到周五（A股收盘后）
+    - cron: '30 21 * * 1-5'  # 北京时间 次日 05:30，抓美股前一日收盘
   workflow_dispatch:
     inputs:
       mode:
