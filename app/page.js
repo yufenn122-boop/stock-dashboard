@@ -1,3 +1,5 @@
+export const revalidate = 0
+
 import { getSql } from '@/lib/db'
 import DashboardClient from './DashboardClient'
 
